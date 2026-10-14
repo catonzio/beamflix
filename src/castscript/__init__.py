@@ -1,4 +1,3 @@
-def main() -> None:
-    from castscript.script import main as run
+from castscript.cli import main
 
-    run()
+__all__ = ["main"]

@@ -1,7 +1,7 @@
 [project]
 name = "castscript"
 version = "0.1.0"
-description = "Add your description here"
+description = "Play movies and series on a Chromecast with Google TV via JustWatch deep links"
 readme = "README.md"
 authors = [
     { name = "Danilo Catone", email = "danilocatone@gmail.com" }
