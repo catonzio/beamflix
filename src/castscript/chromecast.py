@@ -8,6 +8,16 @@ from castscript.errors import ConnectionFailed
 
 UI_DUMP_PATH = "/sdcard/castscript-ui.xml"
 
+# Remote-control commands -> key sent to the Chromecast. Media keys go to the
+# app that is playing; wake and sleep also turn the TV on/off through HDMI-CEC
+REMOTE_KEYS = {
+    "play": "KEYCODE_MEDIA_PLAY",
+    "pause": "KEYCODE_MEDIA_PAUSE",
+    "toggle": "KEYCODE_MEDIA_PLAY_PAUSE",
+    "startup": "KEYCODE_WAKEUP",
+    "shutdown": "KEYCODE_SLEEP",
+}
+
 
 class Chromecast:
     def __init__(self, serial: str) -> None:

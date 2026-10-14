@@ -23,6 +23,23 @@ Starting: Intent { ... }
 The first time you run it, castscript asks you to pair with the TV (see
 [First pairing](#first-pairing)).
 
+### Remote control
+
+```sh
+uv run castscript toggle
+```
+
+| Command | Effect |
+| --- | --- |
+| `play` | Resume playback |
+| `pause` | Pause playback |
+| `toggle` | Play if paused, pause if playing |
+| `startup` | Wake the Chromecast (and turn on the TV through HDMI-CEC) |
+| `shutdown` | Put the Chromecast to sleep (and turn off the TV through HDMI-CEC) |
+
+A single word matching a command is always treated as a command, so a title
+like "Play" can't be searched on its own.
+
 ## Setup
 
 ### Requirements
