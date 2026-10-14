@@ -4,9 +4,11 @@ import xml.etree.ElementTree as ET
 
 from castscript import adb
 from castscript.config import CHROMECAST_IP, CHROMECAST_PORT
-from castscript.errors import ConnectionFailed
+from castscript.errors import CastscriptError, ConnectionFailed
 
 UI_DUMP_PATH = "/sdcard/castscript-ui.xml"
+
+WIRELESS_DEBUGGING_PATH = "Settings > System > Developer options > Wireless debugging"
 
 # Remote-control commands -> key sent to the Chromecast. Media keys go to the
 # app that is playing; wake and sleep also turn the TV on/off through HDMI-CEC
@@ -49,6 +51,21 @@ class Chromecast:
         self.stop_app(package)
         return self.open_deeplink(deeplink)
 
+    def clean(self) -> None:
+        """Close every installed app, clear all app caches and go home."""
+        self.shell(
+            "for p in $(pm list packages -3 | cut -d: -f2); do am force-stop $p; done",
+            timeout=60,
+        )
+        # Asking for more free space than the storage has clears every app cache
+        self.shell("pm trim-caches 999G", timeout=60)
+        self.press("KEYCODE_HOME")
+
+    def reboot(self) -> None:
+        # Android turns wireless debugging off at boot, so the connection is
+        # lost until it is enabled again on the TV
+        adb.run("-s", self.serial, "reboot")
+
     def dump_ui(self) -> ET.Element | None:
         """Current screen as a uiautomator hierarchy, or None if unavailable."""
         xml = self.shell(
@@ -66,8 +83,14 @@ def connect(
 ) -> Chromecast:
     """Connect over wireless debugging, discovering the port via mDNS."""
     adb.start_server()
-    port = adb.mdns_port(ip, adb.CONNECT_SERVICE) or fallback_port
+    discovered = adb.mdns_port(ip, adb.CONNECT_SERVICE)
+    port = discovered or fallback_port
     serial = adb.connect(ip, port)
+    if serial is None and discovered is None:
+        raise CastscriptError(
+            f"Cannot reach {ip}: wireless debugging looks disabled (it turns off "
+            f"at every reboot). Enable it on the TV in {WIRELESS_DEBUGGING_PATH}"
+        )
     if serial is None:
         raise ConnectionFailed(
             f"Cannot connect to {ip}:{port}: check the port on the main "

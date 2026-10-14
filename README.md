@@ -36,6 +36,13 @@ uv run castscript toggle
 | `toggle` | Play if paused, pause if playing |
 | `startup` | Wake the Chromecast (and turn on the TV through HDMI-CEC) |
 | `shutdown` | Put the Chromecast to sleep (and turn off the TV through HDMI-CEC) |
+| `clean` | Close every installed app, clear all app caches and go back to the home screen |
+| `restart` | `clean`, then reboot the Chromecast |
+
+> [!WARNING]
+> Android turns wireless debugging off at every reboot (including `restart`).
+> Enable it again on the TV before using castscript. Pairing is kept, so you
+> don't need to pair again.
 
 A single word matching a command is always treated as a command, so a title
 like "Play" can't be searched on its own.
@@ -62,6 +69,9 @@ the TV is done through the `adb` command.
    unlock the developer options.
 2. **Settings > System > Developer options**: turn on **Wireless debugging**.
 3. Write down the IP address and port shown on the Wireless debugging screen.
+
+Wireless debugging turns off every time the Chromecast reboots: turn it back on
+from the same screen.
 
 ### Configure
 
