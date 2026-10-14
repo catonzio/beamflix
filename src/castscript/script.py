@@ -5,6 +5,8 @@ import time
 
 from ppadb.client import Client as AdbClient
 
+from castscript.justwatch import search
+
 # Chromecast con Google TV (Impostazioni > Sistema > Opzioni sviluppatore > Debug wireless)
 CHROMECAST_IP = "192.168.1.14"
 # Porta della schermata principale di Debug wireless: usata solo se la scoperta
@@ -14,9 +16,13 @@ CHROMECAST_PORT = 39667
 ADB_HOST = "127.0.0.1"
 ADB_PORT = 5037
 
-# ID della serie (netflix.com/title/<ID>) o della puntata (netflix.com/watch/<ID>)
-NETFLIX_URL = "https://www.netflix.com/title/81231974"
-NETFLIX_PACKAGE = "com.netflix.ninja"  # app Netflix per Android TV
+# Piattaforme JustWatch (clearName) -> app Android TV, in ordine di preferenza
+PROVIDERS = {
+    "Netflix": "com.netflix.ninja",
+    "Disney Plus": "com.disney.disneyplus",
+    "Amazon Prime Video": "com.amazon.amazonvideo.livingroom",
+    "Now TV": "com.nowtv.it",
+}
 
 ADB = shutil.which("adb") or ""
 
@@ -125,21 +131,36 @@ def connect():
 
 
 def main() -> None:
+    if len(sys.argv) < 2:
+        sys.exit("Uso: castscript <titolo di una serie o di un film>")
+    query = " ".join(sys.argv[1:])
+
+    title = search(query)
+    if title is None:
+        sys.exit(f"Nessun risultato per '{query}'")
+    print(f"Trovato: {title.name} ({title.year})")
+
+    links = {o.provider: o.deeplink for o in title.offers}
+    provider = next((p for p in PROVIDERS if p in links), None)
+    if provider is None:
+        sys.exit(f"Non disponibile sulle tue app (offerte: {', '.join(links) or 'nessuna'})")
+    package, deeplink = PROVIDERS[provider], links[provider]
+    # Il link NOW apre la scheda (action PDP): con PLAY parte l'episodio del link
+    deeplink = deeplink.replace("%22action%22%3A%22PDP%22", "%22action%22%3A%22PLAY%22")
+    print(f"Apro su {provider}: {deeplink}")
+
     device = connect()
 
     # 1. Sveglia il Chromecast (e accende la TV tramite HDMI-CEC)
     device.shell("input keyevent KEYCODE_WAKEUP")
-    time.sleep(2)
 
-    # 2. Apre Netflix direttamente sulla serie tramite deep link
-    out = device.shell(
-        f"am start -a android.intent.action.VIEW -d '{NETFLIX_URL}' -p {NETFLIX_PACKAGE}"
-    )
-    print(out.strip())
+    # 2. Chiude l'app: se è già aperta riporta in primo piano la schermata
+    # attuale e ignora il link
+    device.shell(f"am force-stop {package}")
 
-    # 3. Se serve, aspetta il caricamento e preme OK/Play
-    # time.sleep(8)
-    # device.shell("input keyevent KEYCODE_DPAD_CENTER")
+    # 3. Avvia il deep link di JustWatch (URI intent:// con pacchetto ed extra già
+    # inclusi; per Netflix S.source=30 salta la scelta del profilo)
+    print(device.shell(f"am start '{deeplink}'").strip())
 
 
 if __name__ == "__main__":
