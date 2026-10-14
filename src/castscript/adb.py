@@ -1,8 +1,4 @@
-"""Wrapper around the adb command-line tool.
-
-ppadb talks to the adb server but supports neither `pair` nor `mdns`, so
-pairing, discovery and connection go through the CLI.
-"""
+"""Wrapper around the adb command-line tool."""
 
 import shutil
 import subprocess

@@ -36,9 +36,8 @@ The first time you run it, castscript asks you to pair with the TV (see
 
 - A Chromecast with Google TV on the same network as the computer
 
-The Python dependencies (only
-[pure-python-adb](https://github.com/Swind/pure-python-adb)) are installed by
-uv on the first run. To install them yourself, run `uv sync`.
+There are no Python dependencies besides the standard library: everything on
+the TV is done through the `adb` command.
 
 ### Enable wireless debugging on the Chromecast
 
@@ -57,6 +56,7 @@ Edit [src/castscript/config.py](src/castscript/config.py):
 | `CHROMECAST_PORT` | Wireless debugging port. Used only if mDNS discovery fails, because the port changes every time wireless debugging restarts |
 | `JUSTWATCH_COUNTRY`, `JUSTWATCH_LANGUAGE` | JustWatch catalog to search (default: Italy) |
 | `PROVIDERS` | JustWatch provider name → Android TV app package, in order of preference. Keep only the apps you have installed and subscribed to |
+| `PROFILES` | JustWatch provider name → profile to choose when the app asks "Who's watching?". Supported for Disney+ only; PIN-protected profiles are not supported |
 
 Supported by default: Netflix, Disney+, Amazon Prime Video, NOW.
 
@@ -93,6 +93,10 @@ castscript the bear
 4. **Launch**: wakes the Chromecast (which also turns on the TV through
    HDMI-CEC), force-stops the app so it doesn't just resume its last screen,
    then runs `am start` with the deep link.
+5. **Profile** ([profiles.py](src/castscript/profiles.py)): if the app shows its
+   profile picker, reads the screen with `uiautomator dump`, moves the focus to
+   the profile set in `PROFILES` and selects it. Netflix doesn't need this,
+   because its deep link already skips the picker.
 
 ## Limitations
 

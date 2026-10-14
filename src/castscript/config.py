@@ -6,10 +6,6 @@ CHROMECAST_IP = "192.168.1.14"
 # cannot find it (it changes every time wireless debugging is restarted)
 CHROMECAST_PORT = 39667
 
-# Local adb server
-ADB_HOST = "127.0.0.1"
-ADB_PORT = 5037
-
 # JustWatch catalog to search
 JUSTWATCH_COUNTRY = "IT"
 JUSTWATCH_LANGUAGE = "it"
@@ -20,4 +16,11 @@ PROVIDERS = {
     "Disney Plus": "com.disney.disneyplus",
     "Amazon Prime Video": "com.amazon.amazonvideo.livingroom",
     "Now TV": "com.nowtv.it",
+}
+
+# JustWatch provider -> profile to choose when the app asks "Who's watching?"
+# (only for apps listed in profiles.PROFILE_PICKERS; PIN-protected profiles
+# are not supported)
+PROFILES = {
+    "Disney Plus": "dandi",
 }

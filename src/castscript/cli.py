@@ -3,8 +3,9 @@
 import argparse
 import sys
 
-from castscript import chromecast, justwatch, pairing, providers
+from castscript import chromecast, justwatch, pairing, profiles, providers
 from castscript.chromecast import Chromecast
+from castscript.config import PROFILES
 from castscript.errors import CastscriptError, ConnectionFailed
 
 
@@ -34,6 +35,10 @@ def play(query: str) -> None:
     device = connect()
     print(f"Connected to {device.serial}")
     print(device.launch(link.package, link.deeplink))
+
+    profile = PROFILES.get(link.provider)
+    if profile and profiles.select(device, link.package, profile):
+        print(f"Selected profile: {profile}")
 
 
 def connect() -> Chromecast:

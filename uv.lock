@@ -10,15 +10,3 @@ resolution-markers = [
 name = "castscript"
 version = "0.1.0"
 source = { editable = "." }
-dependencies = [
-    { name = "pure-python-adb" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pure-python-adb", specifier = ">=0.3.0.dev0" }]
-
-[[package]]
-name = "pure-python-adb"
-version = "0.3.0.dev0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0a/b7/1c4d6b2cbe499b4180177abcf3ae2bb2d8b36acf695ae7d8e9eb99ba00ea/pure-python-adb-0.3.0.dev0.tar.gz", hash = "sha256:0ecc89d780160cfe03260ba26df2c471a05263b2cad0318363573ee8043fb94d", size = 25680, upload-time = "2020-08-05T18:41:27.157Z" }
