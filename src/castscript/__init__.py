@@ -1,2 +1,4 @@
 def main() -> None:
-    print("Hello from castscript!")
+    from castscript.script import main as run
+
+    run()
