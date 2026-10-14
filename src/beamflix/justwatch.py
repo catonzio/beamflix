@@ -4,7 +4,7 @@ import json
 import urllib.request
 from dataclasses import dataclass
 
-from castscript.config import JUSTWATCH_COUNTRY, JUSTWATCH_LANGUAGE
+from beamflix.config import JUSTWATCH_COUNTRY, JUSTWATCH_LANGUAGE
 
 # Public but unofficial JustWatch GraphQL API: it may change without notice
 API_URL = "https://apis.justwatch.com/graphql"

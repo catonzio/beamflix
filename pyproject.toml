@@ -1,5 +1,5 @@
 [project]
-name = "castscript"
+name = "beamflix"
 version = "0.1.0"
 description = "Play movies and series on a Chromecast with Google TV via JustWatch deep links"
 readme = "README.md"
@@ -10,7 +10,7 @@ requires-python = ">=3.13"
 dependencies = []
 
 [project.scripts]
-castscript = "castscript:main"
+beamflix = "beamflix:main"
 
 [build-system]
 requires = ["uv_build>=0.11.32,<0.12.0"]

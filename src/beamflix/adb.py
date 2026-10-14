@@ -3,7 +3,7 @@
 import shutil
 import subprocess
 
-from castscript.errors import CastscriptError
+from beamflix.errors import BeamflixError
 
 ADB = shutil.which("adb") or ""
 
@@ -25,7 +25,7 @@ def run(*args: str, timeout: float = 15) -> str:
 
 def start_server() -> None:
     if not ADB:
-        raise CastscriptError(
+        raise BeamflixError(
             "adb not found in PATH: install the Android platform-tools"
         )
     # No capture_output: the adb server keeps running in the background and,
@@ -68,7 +68,7 @@ def pair(ip: str, port: int, code: str) -> str:
     """Pair with `ip:port` using the 6-digit code and return adb's output."""
     output = run("pair", f"{ip}:{port}", code, timeout=30)
     if "Successfully paired" not in output:
-        raise CastscriptError(
+        raise BeamflixError(
             f"{output}\nPairing failed: reopen the pairing dialog on the TV and retry"
         )
     return output

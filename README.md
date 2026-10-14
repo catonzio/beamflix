@@ -1,15 +1,15 @@
-# castscript
+# beamflix
 
 Play a movie or series on a Chromecast with Google TV straight from the terminal.
 
-castscript searches the title on [JustWatch](https://www.justwatch.com), picks the
+beamflix searches the title on [JustWatch](https://www.justwatch.com), picks the
 first streaming app you have that includes it, connects to the Chromecast over
 wireless adb and opens the app's deep link, so playback starts on the TV.
 
 ## Quick run
 
 ```sh
-uv run castscript stranger things
+uv run beamflix stranger things
 ```
 
 ```text
@@ -20,13 +20,13 @@ Connected to 192.168.1.14:39667
 Starting: Intent { ... }
 ```
 
-The first time you run it, castscript asks you to pair with the TV (see
+The first time you run it, beamflix asks you to pair with the TV (see
 [First pairing](#first-pairing)).
 
 ### Remote control
 
 ```sh
-uv run castscript toggle
+uv run beamflix toggle
 ```
 
 | Command | Effect |
@@ -41,7 +41,7 @@ uv run castscript toggle
 
 > [!WARNING]
 > Android turns wireless debugging off at every reboot (including `restart`).
-> Enable it again on the TV before using castscript. Pairing is kept, so you
+> Enable it again on the TV before using beamflix. Pairing is kept, so you
 > don't need to pair again.
 
 A single word matching a command is always treated as a command, so a title
@@ -75,7 +75,7 @@ from the same screen.
 
 ### Configure
 
-Edit [src/castscript/config.py](src/castscript/config.py):
+Edit [src/beamflix/config.py](src/beamflix/config.py):
 
 | Setting | Description |
 | --- | --- |
@@ -89,11 +89,11 @@ Supported by default: Netflix, Disney+, Amazon Prime Video, NOW.
 
 ### First pairing
 
-If the connection is refused, castscript assumes the computer is not paired yet
+If the connection is refused, beamflix assumes the computer is not paired yet
 and walks you through it:
 
 1. On the TV, open **Wireless debugging > Pair device with pairing code**.
-2. castscript detects the pairing port via mDNS. Press Enter to accept it, or
+2. beamflix detects the pairing port via mDNS. Press Enter to accept it, or
    type the port shown on the TV.
 3. Enter the 6-digit code shown on the TV.
 
@@ -103,24 +103,24 @@ Pairing is stored by adb, so you only need to do this once.
 
 ```sh
 uv tool install .
-castscript the bear
+beamflix the bear
 ```
 
 ## How it works
 
-1. **Search** ([justwatch.py](src/castscript/justwatch.py)): queries the
+1. **Search** ([justwatch.py](src/beamflix/justwatch.py)): queries the
    JustWatch GraphQL API for the most popular match and its Android TV deep
    links. Only subscription, free and ad-supported offers are kept.
-2. **Choose** ([providers.py](src/castscript/providers.py)): takes the first
+2. **Choose** ([providers.py](src/beamflix/providers.py)): takes the first
    provider in `PROVIDERS` that has an offer. NOW links are changed from "open
    the title page" to "play".
-3. **Connect** ([chromecast.py](src/castscript/chromecast.py),
-   [adb.py](src/castscript/adb.py), [pairing.py](src/castscript/pairing.py)):
+3. **Connect** ([chromecast.py](src/beamflix/chromecast.py),
+   [adb.py](src/beamflix/adb.py), [pairing.py](src/beamflix/pairing.py)):
    starts the adb server, finds the port via mDNS, connects, and pairs if needed.
 4. **Launch**: wakes the Chromecast (which also turns on the TV through
    HDMI-CEC), force-stops the app so it doesn't just resume its last screen,
    then runs `am start` with the deep link.
-5. **Profile** ([profiles.py](src/castscript/profiles.py)): if the app shows its
+5. **Profile** ([profiles.py](src/beamflix/profiles.py)): if the app shows its
    profile picker, reads the screen with `uiautomator dump`, moves the focus to
    the profile set in `PROFILES` and selects it. Netflix doesn't need this,
    because its deep link already skips the picker.

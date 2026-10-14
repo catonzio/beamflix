@@ -4,8 +4,8 @@ import re
 import time
 import xml.etree.ElementTree as ET
 
-from castscript.chromecast import Chromecast
-from castscript.errors import CastscriptError
+from beamflix.chromecast import Chromecast
+from beamflix.errors import BeamflixError
 
 # App package -> resource id of its profile picker screen
 PROFILE_PICKERS = {
@@ -34,7 +34,7 @@ def select(device: Chromecast, package: str, profile: str) -> bool:
 
         tile = _profile_tile(picker, profile)
         if tile is None:
-            raise CastscriptError(f"Profile '{profile}' not found on the TV")
+            raise BeamflixError(f"Profile '{profile}' not found on the TV")
         focused = next(
             (n for n in picker.iter("node") if n.get("focused") == "true"), None
         )

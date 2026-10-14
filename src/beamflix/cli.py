@@ -3,17 +3,17 @@
 import argparse
 import sys
 
-from castscript import chromecast, justwatch, pairing, profiles, providers
-from castscript.chromecast import REMOTE_KEYS, WIRELESS_DEBUGGING_PATH, Chromecast
-from castscript.config import PROFILES
-from castscript.errors import CastscriptError, ConnectionFailed
+from beamflix import chromecast, justwatch, pairing, profiles, providers
+from beamflix.chromecast import REMOTE_KEYS, WIRELESS_DEBUGGING_PATH, Chromecast
+from beamflix.config import PROFILES
+from beamflix.errors import BeamflixError, ConnectionFailed
 
 COMMANDS = [*REMOTE_KEYS, "clean", "restart"]
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
-        prog="castscript",
+        prog="beamflix",
         description="Play a movie or series on the Chromecast with Google TV.",
         epilog=f"remote-control commands: {', '.join(COMMANDS)}",
     )
@@ -31,14 +31,14 @@ def main(argv: list[str] | None = None) -> None:
             remote(args.words[0].lower())
         else:
             play(" ".join(args.words))
-    except CastscriptError as error:
+    except BeamflixError as error:
         sys.exit(str(error))
 
 
 def play(query: str) -> None:
     title = justwatch.search(query)
     if title is None:
-        raise CastscriptError(f"No results for '{query}'")
+        raise BeamflixError(f"No results for '{query}'")
     print(f"Found: {title.name} ({title.year})")
 
     link = providers.choose(title)

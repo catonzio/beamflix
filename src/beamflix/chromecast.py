@@ -2,11 +2,11 @@
 
 import xml.etree.ElementTree as ET
 
-from castscript import adb
-from castscript.config import CHROMECAST_IP, CHROMECAST_PORT
-from castscript.errors import CastscriptError, ConnectionFailed
+from beamflix import adb
+from beamflix.config import CHROMECAST_IP, CHROMECAST_PORT
+from beamflix.errors import BeamflixError, ConnectionFailed
 
-UI_DUMP_PATH = "/sdcard/castscript-ui.xml"
+UI_DUMP_PATH = "/sdcard/beamflix-ui.xml"
 
 WIRELESS_DEBUGGING_PATH = "Settings > System > Developer options > Wireless debugging"
 
@@ -87,7 +87,7 @@ def connect(
     port = discovered or fallback_port
     serial = adb.connect(ip, port)
     if serial is None and discovered is None:
-        raise CastscriptError(
+        raise BeamflixError(
             f"Cannot reach {ip}: wireless debugging looks disabled (it turns off "
             f"at every reboot). Enable it on the TV in {WIRELESS_DEBUGGING_PATH}"
         )

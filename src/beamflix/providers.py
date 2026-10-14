@@ -2,9 +2,9 @@
 
 from dataclasses import dataclass
 
-from castscript.config import PROVIDERS
-from castscript.errors import CastscriptError
-from castscript.justwatch import Title
+from beamflix.config import PROVIDERS
+from beamflix.errors import BeamflixError
+from beamflix.justwatch import Title
 
 
 @dataclass
@@ -20,7 +20,7 @@ def choose(title: Title, providers: dict[str, str] = PROVIDERS) -> AppLink:
     provider = next((p for p in providers if p in links), None)
     if provider is None:
         available = ", ".join(links) or "none"
-        raise CastscriptError(f"Not available on your apps (offers: {available})")
+        raise BeamflixError(f"Not available on your apps (offers: {available})")
     return AppLink(provider, providers[provider], _autoplay(links[provider]))
 
 

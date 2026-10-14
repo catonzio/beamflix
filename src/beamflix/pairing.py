@@ -2,9 +2,9 @@
 
 import time
 
-from castscript import adb
-from castscript.config import CHROMECAST_IP
-from castscript.errors import CastscriptError
+from beamflix import adb
+from beamflix.config import CHROMECAST_IP
+from beamflix.errors import BeamflixError
 
 DISCOVERY_ATTEMPTS = 30
 DISCOVERY_INTERVAL = 2  # seconds
@@ -41,8 +41,8 @@ def _ask_port(discovered: int | None) -> int:
     answer = input(f"Pairing port shown on the TV{hint}: ").strip()
     if answer:
         if not answer.isdigit():
-            raise CastscriptError(f"Invalid port: {answer}")
+            raise BeamflixError(f"Invalid port: {answer}")
         return int(answer)
     if discovered is None:
-        raise CastscriptError("Missing pairing port")
+        raise BeamflixError("Missing pairing port")
     return discovered

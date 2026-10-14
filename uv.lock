@@ -7,6 +7,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "castscript"
+name = "beamflix"
 version = "0.1.0"
 source = { editable = "." }
