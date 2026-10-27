@@ -131,6 +131,15 @@ beamflix the bear
    the profile set in `PROFILES` and selects it. Netflix doesn't need this,
    because its deep link already skips the picker.
 
+## Tests
+
+```sh
+uv run pytest
+```
+
+The unit tests mock adb and the JustWatch API, so they never touch the TV or
+the network. Coverage (lines and branches) is printed at the end.
+
 ## Limitations
 
 - The JustWatch API is public but unofficial, so it may change without notice.

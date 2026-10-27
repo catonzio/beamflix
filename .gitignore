@@ -9,3 +9,5 @@ wheels/
 # Virtual environments
 .venv
 stored_credentials.json
+# Test coverage data
+.coverage
