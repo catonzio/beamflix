@@ -124,7 +124,12 @@ def test_dump_ui_returns_none_when_output_is_not_xml(cast, monkeypatch, garbage)
 
 @pytest.fixture
 def adb_mocks(monkeypatch):
-    state = {"started": 0, "discovered": 40000, "connect_result": SERIAL, "connect_args": None}
+    state = {
+        "started": 0,
+        "discovered": 40000,
+        "connect_result": SERIAL,
+        "connect_args": None,
+    }
 
     def start_server():
         state["started"] += 1
@@ -161,7 +166,10 @@ def test_connect_falls_back_to_configured_port_when_nothing_discovered(adb_mocks
 def test_connect_uses_configured_defaults(adb_mocks):
     adb_mocks["discovered"] = None
     chromecast.connect()
-    assert adb_mocks["connect_args"] == (chromecast.CHROMECAST_IP, chromecast.CHROMECAST_PORT)
+    assert adb_mocks["connect_args"] == (
+        chromecast.CHROMECAST_IP,
+        chromecast.CHROMECAST_PORT,
+    )
 
 
 def test_connect_nothing_discovered_and_failure_suggests_wireless_debugging_and_connect(

@@ -40,9 +40,7 @@ def run(*args: str, timeout: float = 15) -> str:
 
 def start_server() -> None:
     if not ADB:
-        raise BeamflixError(
-            "adb not found in PATH: install the Android platform-tools"
-        )
+        raise BeamflixError("adb not found in PATH: install the Android platform-tools")
     _start_server()
     # A server started earlier (e.g. by plain `adb`) may use Openscreen
     if "Openscreen" in run("mdns", "check"):

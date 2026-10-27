@@ -66,7 +66,9 @@ def test_now_link_is_changed_from_title_page_to_play():
 
 
 def test_links_without_pdp_action_are_left_untouched():
-    other = "intent://www.netflix.com/title/80057281#Intent;package=com.netflix.ninja;end"
+    other = (
+        "intent://www.netflix.com/title/80057281#Intent;package=com.netflix.ninja;end"
+    )
     assert choose(_title(("Netflix", other)), PROVIDERS).deeplink == other
 
 
@@ -86,7 +88,9 @@ NOW_REAL = (
 
 def test_real_justwatch_now_link_is_changed_to_play():
     link = choose(_title(("Now TV", NOW_REAL)), PROVIDERS).deeplink
-    assert link == NOW_REAL.replace("%22action%22%3A%22PDP%22", "%22action%22%3A%22PLAY%22")
+    assert link == NOW_REAL.replace(
+        "%22action%22%3A%22PDP%22", "%22action%22%3A%22PLAY%22"
+    )
 
 
 @pytest.mark.parametrize(
@@ -95,7 +99,10 @@ def test_real_justwatch_now_link_is_changed_to_play():
         ('"action":"PDP"', '"action":"PLAY"'),  # JSON not URL-encoded
         ("%22action%22%3a%22PDP%22", "%22action%22%3a%22PLAY%22"),  # lowercase hex
         ('"action": "PDP"', '"action": "PLAY"'),  # space after the colon
-        ("%22action%22%3A%20%22PDP%22", "%22action%22%3A%20%22PLAY%22"),  # encoded space
+        (
+            "%22action%22%3A%20%22PDP%22",
+            "%22action%22%3A%20%22PLAY%22",
+        ),  # encoded space
         ('%22action%22:"PDP"', '%22action%22:"PLAY"'),  # mixed encoding
     ],
 )

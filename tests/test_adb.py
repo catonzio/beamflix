@@ -87,7 +87,9 @@ def test_run_returns_empty_string_on_timeout(sp_run):
 
 
 def test_run_does_not_swallow_nonzero_exit_output(sp_run):
-    sp_run.return_value = subprocess.CompletedProcess([], 1, stdout="", stderr="error: closed")
+    sp_run.return_value = subprocess.CompletedProcess(
+        [], 1, stdout="", stderr="error: closed"
+    )
     assert adb.run("x") == "error: closed"
 
 
@@ -102,7 +104,10 @@ def test_start_server_raises_when_adb_not_in_path(monkeypatch, sp_run):
 
 
 def test_start_server_starts_once_when_bonjour_backend_in_use(sp_run):
-    sp_run.side_effect = [completed(), completed(stdout="mdns daemon version [Bonjour]")]
+    sp_run.side_effect = [
+        completed(),
+        completed(stdout="mdns daemon version [Bonjour]"),
+    ]
     adb.start_server()
     cmds = [c.args[0] for c in sp_run.call_args_list]
     assert cmds == [[FAKE_ADB, "start-server"], [FAKE_ADB, "mdns", "check"]]
@@ -126,7 +131,12 @@ def test_start_server_restarts_server_when_openscreen_backend_in_use(sp_run):
 
 
 def test_start_server_does_not_capture_output_and_passes_env(sp_run):
-    sp_run.side_effect = [completed(), completed(stdout="Openscreen"), completed(), completed()]
+    sp_run.side_effect = [
+        completed(),
+        completed(stdout="Openscreen"),
+        completed(),
+        completed(),
+    ]
     adb.start_server()
     starts = [c for c in sp_run.call_args_list if c.args[0][1:] == ["start-server"]]
     assert len(starts) == 2
@@ -225,7 +235,9 @@ def test_discover_port_retries_with_sleep_until_found(monkeypatch, fake_env):
     assert fake_env.call_args_list == [call(adb.MDNS_INTERVAL)] * 2
 
 
-def test_discover_port_gives_up_after_max_attempts_without_final_sleep(monkeypatch, fake_env):
+def test_discover_port_gives_up_after_max_attempts_without_final_sleep(
+    monkeypatch, fake_env
+):
     m = MagicMock(return_value=None)
     monkeypatch.setattr(adb, "mdns_port", m)
     assert adb.discover_port(IP, adb.CONNECT_SERVICE) is None

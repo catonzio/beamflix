@@ -55,7 +55,10 @@ def set_title(mocks, provider="Netflix"):
 
 # ---- argument parsing: command vs title ----
 
-@pytest.mark.parametrize("word", ["play", "pause", "toggle", "startup", "shutdown", "clean", "restart"])
+
+@pytest.mark.parametrize(
+    "word", ["play", "pause", "toggle", "startup", "shutdown", "clean", "restart"]
+)
 def test_single_command_word_runs_remote(mocks, monkeypatch, word):
     remote = MagicMock()
     monkeypatch.setattr(cli, "remote", remote)
@@ -116,17 +119,34 @@ def test_help_lists_commands(capsys):
         cli.main(["--help"])
     assert exc.value.code == 0
     out = capsys.readouterr().out
-    for command in ["connect", "play", "pause", "toggle", "startup", "shutdown", "clean", "restart"]:
+    for command in [
+        "connect",
+        "play",
+        "pause",
+        "toggle",
+        "startup",
+        "shutdown",
+        "clean",
+        "restart",
+    ]:
         assert command in out
 
 
 def test_commands_list_matches_readme():
     assert set(cli.COMMANDS) == {
-        "connect", "play", "pause", "toggle", "startup", "shutdown", "clean", "restart"
+        "connect",
+        "play",
+        "pause",
+        "toggle",
+        "startup",
+        "shutdown",
+        "clean",
+        "restart",
     }
 
 
 # ---- error handling in main ----
+
 
 def test_beamflix_error_exits_with_message(monkeypatch):
     monkeypatch.setattr(cli, "play", MagicMock(side_effect=BeamflixError("boom")))
@@ -147,6 +167,7 @@ def test_interrupt_prints_message_and_exits_130(monkeypatch, capsys, exc_type):
 
 
 # ---- play ----
+
 
 def test_play_without_results_raises_no_results(mocks):
     mocks.search.return_value = None
@@ -210,6 +231,7 @@ def test_play_selects_profile_only_after_launch(mocks, device):
 
 # ---- remote ----
 
+
 @pytest.mark.parametrize("command", list(REMOTE_KEYS))
 def test_remote_key_commands_press_mapped_keycode(mocks, device, capsys, command):
     cli.remote(command)
@@ -242,6 +264,7 @@ def test_remote_restart_cleans_then_reboots_and_prints_reminder(mocks, device, c
 
 
 # ---- connect() helper ----
+
 
 def test_connect_returns_device_without_pairing(mocks, device, capsys):
     assert cli.connect() is device
@@ -281,6 +304,7 @@ def test_remote_command_does_not_pair_on_plain_error(mocks):
 
 # ---- connect command (pair_and_connect) ----
 
+
 def test_connect_command_connects_and_prints_serial(mocks, device, capsys):
     cli.main(["connect"])
     mocks.pair.assert_not_called()
@@ -296,7 +320,9 @@ def test_connect_command_connects_and_prints_serial(mocks, device, capsys):
         BeamflixError("Wireless debugging looks disabled"),
     ],
 )
-def test_connect_command_pairs_then_reconnects_on_any_beamflix_error(mocks, device, capsys, error):
+def test_connect_command_pairs_then_reconnects_on_any_beamflix_error(
+    mocks, device, capsys, error
+):
     mocks.connect.side_effect = [error, device]
     cli.main(["connect"])
     mocks.pair.assert_called_once_with()
@@ -312,6 +338,7 @@ def test_connect_command_fails_if_second_connect_fails(mocks):
 
 
 # ---- package wiring ----
+
 
 def test_package_exports_main():
     assert beamflix.main is cli.main

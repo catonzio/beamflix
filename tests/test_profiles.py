@@ -34,7 +34,9 @@ TILES = {
 
 def screen(focus=None, tiles=TILES, picker_id=PICKER_ID):
     inner = "".join(_tile(n, b, n == focus) for n, b in tiles.items())
-    picker = _node(f'resource-id="{picker_id}" package="{PKG}" bounds="[0,0][1920,1080]"', inner)
+    picker = _node(
+        f'resource-id="{picker_id}" package="{PKG}" bounds="[0,0][1920,1080]"', inner
+    )
     return ET.fromstring(
         '<hierarchy rotation="0">'
         + _node(f'package="{PKG}" bounds="[0,0][1920,1080]"', picker)
@@ -98,7 +100,11 @@ def test_focus_on_the_right_moves_left_then_selects():
 def test_multiple_steps_are_taken_to_reach_the_profile():
     device = FakeDevice([screen("mamma"), screen("dandi"), screen("papa")])
     assert profiles.select(device, PKG, "papa") is True
-    assert device.keys == ["KEYCODE_DPAD_RIGHT", "KEYCODE_DPAD_RIGHT", "KEYCODE_DPAD_CENTER"]
+    assert device.keys == [
+        "KEYCODE_DPAD_RIGHT",
+        "KEYCODE_DPAD_RIGHT",
+        "KEYCODE_DPAD_CENTER",
+    ]
 
 
 def test_profile_name_match_is_case_insensitive():
@@ -128,7 +134,9 @@ def test_unknown_profile_raises_error_naming_the_profile():
 
 
 def test_waits_until_picker_appears():
-    splash = ET.fromstring('<hierarchy><node package="x" bounds="[0,0][1,1]"/></hierarchy>')
+    splash = ET.fromstring(
+        '<hierarchy><node package="x" bounds="[0,0][1,1]"/></hierarchy>'
+    )
     device = FakeDevice([splash, splash, screen(focus="dandi")])
     assert profiles.select(device, PKG, "dandi") is True
     assert device.dumps == 3
@@ -185,7 +193,11 @@ def test_unusable_bounds_never_crash_and_give_up_without_pressing(bounds):
 
 def test_target_tile_without_bounds_is_retried_until_positions_are_known(fast_clock):
     device = FakeDevice(
-        [screen("mamma", tiles={**TILES, "dandi": ""}), screen("mamma"), screen("dandi")]
+        [
+            screen("mamma", tiles={**TILES, "dandi": ""}),
+            screen("mamma"),
+            screen("dandi"),
+        ]
     )
     assert profiles.select(device, PKG, "dandi") is True
     assert fast_clock == [1]
@@ -193,7 +205,9 @@ def test_target_tile_without_bounds_is_retried_until_positions_are_known(fast_cl
 
 
 def test_focused_tile_without_bounds_is_retried_until_positions_are_known(fast_clock):
-    device = FakeDevice([screen("mamma", tiles={**TILES, "mamma": ""}), screen("dandi")])
+    device = FakeDevice(
+        [screen("mamma", tiles={**TILES, "mamma": ""}), screen("dandi")]
+    )
     assert profiles.select(device, PKG, "dandi") is True
     assert fast_clock == [1]
     assert device.keys == ["KEYCODE_DPAD_CENTER"]

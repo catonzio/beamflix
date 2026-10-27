@@ -32,6 +32,7 @@ def feed_inputs(monkeypatch, *answers):
 
 # ---- _discover_pairing_port
 
+
 def test_discover_returns_port_found_on_first_attempt(monkeypatch, capsys, sleeps):
     monkeypatch.setattr(pairing.adb, "mdns_port", lambda ip, svc: 37000)
     assert pairing._discover_pairing_port("1.2.3.4") == 37000
@@ -57,7 +58,9 @@ def test_discover_polls_with_sleep_until_found(monkeypatch, capsys, sleeps):
     assert ".." in out and out.endswith("\n")
 
 
-def test_discover_gives_up_after_max_attempts_returning_none(monkeypatch, capsys, sleeps):
+def test_discover_gives_up_after_max_attempts_returning_none(
+    monkeypatch, capsys, sleeps
+):
     count = []
     monkeypatch.setattr(pairing.adb, "mdns_port", lambda ip, svc: count.append(1))
     assert pairing._discover_pairing_port("ip") is None
@@ -78,6 +81,7 @@ def test_discover_ends_progress_line_even_on_exception(monkeypatch, capsys, exc)
 
 
 # ---- _ask_port
+
 
 def test_ask_port_enter_accepts_discovered_default_shown_in_brackets(monkeypatch):
     prompts = feed_inputs(monkeypatch, "")
@@ -112,12 +116,15 @@ def test_ask_port_empty_without_discovery_raises_missing_port(monkeypatch):
 
 # ---- pair
 
+
 def test_pair_prints_instructions_asks_code_and_pairs(monkeypatch, capsys):
     monkeypatch.setattr(pairing.adb, "mdns_port", lambda ip, svc: 37000)
     feed_inputs(monkeypatch, "", "  123456 ")
     paired = []
     monkeypatch.setattr(
-        pairing.adb, "pair", lambda ip, port, code: paired.append((ip, port, code)) or "Paired OK"
+        pairing.adb,
+        "pair",
+        lambda ip, port, code: paired.append((ip, port, code)) or "Paired OK",
     )
     pairing.pair("1.2.3.4")
     out = capsys.readouterr().out
@@ -133,7 +140,9 @@ def test_pair_typed_port_overrides_discovered(monkeypatch):
     feed_inputs(monkeypatch, "40000", "654321")
     paired = []
     monkeypatch.setattr(
-        pairing.adb, "pair", lambda ip, port, code: paired.append((ip, port, code)) or ""
+        pairing.adb,
+        "pair",
+        lambda ip, port, code: paired.append((ip, port, code)) or "",
     )
     pairing.pair("ip")
     assert paired == [("ip", 40000, "654321")]
