@@ -1,5 +1,6 @@
 """Choice of the streaming app to open among the offers of a title."""
 
+import re
 from dataclasses import dataclass
 
 from beamflix.config import PROVIDERS
@@ -24,6 +25,13 @@ def choose(title: Title, providers: dict[str, str] = PROVIDERS) -> AppLink:
     return AppLink(provider, providers[provider], _autoplay(links[provider]))
 
 
+# `"action":"PDP"` inside a deep link, with the JSON URL-encoded or not
+# (e.g. %22action%22%3A%22PDP%22, hex digits in any case, optional spaces)
+_PDP_ACTION = re.compile(
+    r'((?:%22|")action(?:%22|")\s*(?i:%3A|:)(?:\s|%20)*(?:%22|"))PDP(%22|")'
+)
+
+
 def _autoplay(deeplink: str) -> str:
     # NOW links open the title page (PDP action): with PLAY the linked episode starts
-    return deeplink.replace("%22action%22%3A%22PDP%22", "%22action%22%3A%22PLAY%22")
+    return _PDP_ACTION.sub(r"\1PLAY\2", deeplink)

@@ -74,3 +74,41 @@ def test_only_the_action_field_is_rewritten():
     link = "intent://x?a=%22PDP%22&b=%22action%22%3A%22PDP%22#Intent;end"
     out = choose(_title(("Netflix", link)), PROVIDERS).deeplink
     assert out == "intent://x?a=%22PDP%22&b=%22action%22%3A%22PLAY%22#Intent;end"
+
+
+# Deep link returned by JustWatch for a NOW episode (October 2026)
+NOW_REAL = (
+    "intent://tv.client.ott.sky.com/deeplink?deeplinkData=%7B%22pvid%22%3A"
+    "%22R_160706_HD%22%2C%22type%22%3A%22EPISODE%22%2C%22action%22%3A%22PDP%22%7D"
+    "#Intent;launchFlags=0x00800000;scheme=https;end"
+)
+
+
+def test_real_justwatch_now_link_is_changed_to_play():
+    link = choose(_title(("Now TV", NOW_REAL)), PROVIDERS).deeplink
+    assert link == NOW_REAL.replace("%22action%22%3A%22PDP%22", "%22action%22%3A%22PLAY%22")
+
+
+@pytest.mark.parametrize(
+    ("action", "expected"),
+    [
+        ('"action":"PDP"', '"action":"PLAY"'),  # JSON not URL-encoded
+        ("%22action%22%3a%22PDP%22", "%22action%22%3a%22PLAY%22"),  # lowercase hex
+        ('"action": "PDP"', '"action": "PLAY"'),  # space after the colon
+        ("%22action%22%3A%20%22PDP%22", "%22action%22%3A%20%22PLAY%22"),  # encoded space
+        ('%22action%22:"PDP"', '%22action%22:"PLAY"'),  # mixed encoding
+    ],
+)
+def test_pdp_action_is_rewritten_in_any_encoding_keeping_the_rest(action, expected):
+    link = f"intent://x?data={{{action},%22id%22:1}}#Intent;end"
+    out = choose(_title(("Now TV", link)), PROVIDERS).deeplink
+    assert out == f"intent://x?data={{{expected},%22id%22:1}}#Intent;end"
+
+
+@pytest.mark.parametrize(
+    "action",
+    ['"action":"PDPX"', '"action":"XPDP"', '"type":"PDP"', '"action":"PLAY"'],
+)
+def test_values_other_than_the_pdp_action_are_left_untouched(action):
+    link = f"intent://x?data={{{action}}}#Intent;end"
+    assert choose(_title(("Now TV", link)), PROVIDERS).deeplink == link

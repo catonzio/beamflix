@@ -65,10 +65,11 @@ def _start_server() -> None:
 def discover_port(ip: str, service: str) -> int | None:
     """Like mdns_port, but waits a few seconds for the service to show up."""
     for attempt in range(MDNS_ATTEMPTS):
+        if attempt:
+            time.sleep(MDNS_INTERVAL)
         port = mdns_port(ip, service)
-        if port or attempt == MDNS_ATTEMPTS - 1:
+        if port:
             return port
-        time.sleep(MDNS_INTERVAL)
     return None
 
 

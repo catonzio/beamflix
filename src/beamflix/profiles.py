@@ -38,13 +38,16 @@ def select(device: Chromecast, package: str, profile: str) -> bool:
         focused = next(
             (n for n in picker.iter("node") if n.get("focused") == "true"), None
         )
-        if focused is None:
+        tile_range = _x_range(tile)
+        focused_range = None if focused is None else _x_range(focused)
+        if tile_range is None or focused_range is None:
+            # No focus yet, or a dump taken mid-layout without positions: retry
             time.sleep(1)
             continue
 
         # Profiles are laid out in a row: move the focus until it is on the tile
-        target_x = _center_x(tile)
-        left, right = _x_range(focused)
+        target_x = sum(tile_range) // 2
+        left, right = focused_range
         if left <= target_x <= right:
             device.press("KEYCODE_DPAD_CENTER")
             return True
@@ -67,12 +70,10 @@ def _profile_tile(picker: ET.Element, profile: str) -> ET.Element | None:
     )
 
 
-def _x_range(node: ET.Element) -> tuple[int, int]:
+def _x_range(node: ET.Element) -> tuple[int, int] | None:
+    """Horizontal extent of `node`, or None if its bounds are missing or malformed."""
     # Bounds look like: [715,356][960,717]
-    x0, _, x1, _ = map(int, re.findall(r"\d+", node.get("bounds", "")))
-    return x0, x1
-
-
-def _center_x(node: ET.Element) -> int:
-    x0, x1 = _x_range(node)
-    return (x0 + x1) // 2
+    match = re.fullmatch(r"\[(\d+),\d+\]\[(\d+),\d+\]", node.get("bounds", ""))
+    if match is None:
+        return None
+    return int(match[1]), int(match[2])

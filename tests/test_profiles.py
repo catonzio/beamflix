@@ -173,3 +173,27 @@ def test_timeout_is_respected(monkeypatch):
     device = FakeDevice([screen("dandi")])
     assert profiles.select(device, PKG, "dandi") is False
     assert device.dumps == 0
+
+
+@pytest.mark.parametrize("bounds", ["", "[715,356]", "garbage", "[a,b][c,d]"])
+def test_unusable_bounds_never_crash_and_give_up_without_pressing(bounds):
+    # uiautomator dumps taken mid-layout can lack positions: no ValueError
+    device = FakeDevice([screen("dandi", tiles={**TILES, "dandi": bounds})])
+    assert profiles.select(device, PKG, "dandi") is False
+    assert device.keys == []
+
+
+def test_target_tile_without_bounds_is_retried_until_positions_are_known(fast_clock):
+    device = FakeDevice(
+        [screen("mamma", tiles={**TILES, "dandi": ""}), screen("mamma"), screen("dandi")]
+    )
+    assert profiles.select(device, PKG, "dandi") is True
+    assert fast_clock == [1]
+    assert device.keys == ["KEYCODE_DPAD_RIGHT", "KEYCODE_DPAD_CENTER"]
+
+
+def test_focused_tile_without_bounds_is_retried_until_positions_are_known(fast_clock):
+    device = FakeDevice([screen("mamma", tiles={**TILES, "mamma": ""}), screen("dandi")])
+    assert profiles.select(device, PKG, "dandi") is True
+    assert fast_clock == [1]
+    assert device.keys == ["KEYCODE_DPAD_CENTER"]
