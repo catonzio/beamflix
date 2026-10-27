@@ -8,14 +8,14 @@ from beamflix.chromecast import REMOTE_KEYS, WIRELESS_DEBUGGING_PATH, Chromecast
 from beamflix.config import PROFILES
 from beamflix.errors import BeamflixError, ConnectionFailed
 
-COMMANDS = [*REMOTE_KEYS, "clean", "restart"]
+COMMANDS = ["connect", *REMOTE_KEYS, "clean", "restart"]
 
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="beamflix",
         description="Play a movie or series on the Chromecast with Google TV.",
-        epilog=f"remote-control commands: {', '.join(COMMANDS)}",
+        epilog=f"commands: {', '.join(COMMANDS)}",
     )
     parser.add_argument(
         "words",
@@ -28,11 +28,19 @@ def main(argv: list[str] | None = None) -> None:
     try:
         # A single word matching a command is a command, anything else a title
         if len(args.words) == 1 and args.words[0].lower() in COMMANDS:
-            remote(args.words[0].lower())
+            command = args.words[0].lower()
+            if command == "connect":
+                pair_and_connect()
+            else:
+                remote(command)
         else:
             play(" ".join(args.words))
     except BeamflixError as error:
         sys.exit(str(error))
+    except (KeyboardInterrupt, EOFError):
+        # Ctrl+C anywhere, or Ctrl+D at a prompt
+        print("\nInterrupted", file=sys.stderr)
+        sys.exit(130)
 
 
 def play(query: str) -> None:
@@ -69,6 +77,19 @@ def remote(command: str) -> None:
             "The Chromecast is rebooting: once it is back, enable wireless "
             f"debugging again in {WIRELESS_DEBUGGING_PATH}"
         )
+
+
+def pair_and_connect() -> None:
+    """Connect to the Chromecast, pairing first if the connection fails."""
+    print("Connecting to the Chromecast...")
+    try:
+        device = chromecast.connect()
+    except BeamflixError:
+        # While the TV shows the pairing dialog the connect port may not be
+        # advertised yet, so any failure here is treated as "not paired"
+        pairing.pair()
+        device = chromecast.connect()
+    print(f"Connected to {device.serial}")
 
 
 def connect() -> Chromecast:

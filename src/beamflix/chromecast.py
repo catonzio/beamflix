@@ -83,13 +83,14 @@ def connect(
 ) -> Chromecast:
     """Connect over wireless debugging, discovering the port via mDNS."""
     adb.start_server()
-    discovered = adb.mdns_port(ip, adb.CONNECT_SERVICE)
+    discovered = adb.discover_port(ip, adb.CONNECT_SERVICE)
     port = discovered or fallback_port
     serial = adb.connect(ip, port)
     if serial is None and discovered is None:
         raise BeamflixError(
             f"Cannot reach {ip}: wireless debugging looks disabled (it turns off "
-            f"at every reboot). Enable it on the TV in {WIRELESS_DEBUGGING_PATH}"
+            f"at every reboot). Enable it on the TV in {WIRELESS_DEBUGGING_PATH}. "
+            "To pair a new computer, run: beamflix connect"
         )
     if serial is None:
         raise ConnectionFailed(

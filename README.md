@@ -20,7 +20,7 @@ Connected to 192.168.1.14:39667
 Starting: Intent { ... }
 ```
 
-The first time you run it, beamflix asks you to pair with the TV (see
+The first time, pair with the TV by running `uv run beamflix connect` (see
 [First pairing](#first-pairing)).
 
 ### Remote control
@@ -31,6 +31,7 @@ uv run beamflix toggle
 
 | Command | Effect |
 | --- | --- |
+| `connect` | Connect to the Chromecast, pairing first if needed |
 | `play` | Resume playback |
 | `pause` | Pause playback |
 | `toggle` | Play if paused, pause if playing |
@@ -89,13 +90,15 @@ Supported by default: Netflix, Disney+, Amazon Prime Video, NOW.
 
 ### First pairing
 
-If the connection is refused, beamflix assumes the computer is not paired yet
-and walks you through it:
-
 1. On the TV, open **Wireless debugging > Pair device with pairing code**.
-2. beamflix detects the pairing port via mDNS. Press Enter to accept it, or
+2. Run `uv run beamflix connect`. If it can't connect, it starts pairing.
+3. beamflix detects the pairing port via mDNS. Press Enter to accept it, or
    type the port shown on the TV.
-3. Enter the 6-digit code shown on the TV.
+4. Enter the 6-digit code shown on the TV.
+
+The other commands also start pairing when the connection is refused, but
+they can't tell an unpaired computer from disabled wireless debugging while
+the pairing dialog is open: use `connect` for the first pairing.
 
 Pairing is stored by adb, so you only need to do this once.
 
@@ -117,6 +120,9 @@ beamflix the bear
 3. **Connect** ([chromecast.py](src/beamflix/chromecast.py),
    [adb.py](src/beamflix/adb.py), [pairing.py](src/beamflix/pairing.py)):
    starts the adb server, finds the port via mDNS, connects, and pairs if needed.
+   The server runs with macOS's mDNS (Bonjour) instead of adb's built-in one
+   (Openscreen), which doesn't see the Chromecast; a server already running
+   with Openscreen is restarted.
 4. **Launch**: wakes the Chromecast (which also turns on the TV through
    HDMI-CEC), force-stops the app so it doesn't just resume its last screen,
    then runs `am start` with the deep link.

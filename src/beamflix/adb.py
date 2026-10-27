@@ -1,7 +1,9 @@
 """Wrapper around the adb command-line tool."""
 
+import os
 import shutil
 import subprocess
+import time
 
 from beamflix.errors import BeamflixError
 
@@ -11,12 +13,25 @@ ADB = shutil.which("adb") or ""
 PAIRING_SERVICE = "_adb-tls-pairing"
 CONNECT_SERVICE = "_adb-tls-connect"
 
+# On macOS adb's built-in mDNS backend (Openscreen) doesn't see the Chromecast:
+# use the system one (Bonjour), which finds it right away
+ENV = {**os.environ, "ADB_MDNS_OPENSCREEN": "0"}
+
+# The mDNS backend needs a moment after the server starts to find services
+MDNS_ATTEMPTS = 5
+MDNS_INTERVAL = 1  # seconds
+
 
 def run(*args: str, timeout: float = 15) -> str:
     """Run an adb command and return its combined output ("" on timeout)."""
     try:
         result = subprocess.run(
-            [ADB, *args], capture_output=True, text=True, timeout=timeout, check=False
+            [ADB, *args],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+            env=ENV,
         )
     except subprocess.TimeoutExpired:
         return ""
@@ -28,6 +43,14 @@ def start_server() -> None:
         raise BeamflixError(
             "adb not found in PATH: install the Android platform-tools"
         )
+    _start_server()
+    # A server started earlier (e.g. by plain `adb`) may use Openscreen
+    if "Openscreen" in run("mdns", "check"):
+        run("kill-server")
+        _start_server()
+
+
+def _start_server() -> None:
     # No capture_output: the adb server keeps running in the background and,
     # inheriting the pipes, would keep subprocess.run waiting for them to close
     subprocess.run(
@@ -35,7 +58,18 @@ def start_server() -> None:
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         check=True,
+        env=ENV,
     )
+
+
+def discover_port(ip: str, service: str) -> int | None:
+    """Like mdns_port, but waits a few seconds for the service to show up."""
+    for attempt in range(MDNS_ATTEMPTS):
+        port = mdns_port(ip, service)
+        if port or attempt == MDNS_ATTEMPTS - 1:
+            return port
+        time.sleep(MDNS_INTERVAL)
+    return None
 
 
 def mdns_port(ip: str, service: str) -> int | None:
